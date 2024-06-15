@@ -1,15 +1,12 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from .models import CustomUser
+from django.db.models import Q
 
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
-
-    def validate_email(self, value):
-        if not CustomUser.objects.filter(email=value).exists():
-            raise serializers.ValidationError("This email is not exists.")
-        return value
 
 
 class RegisterSerializer(serializers.Serializer):
@@ -20,15 +17,15 @@ class RegisterSerializer(serializers.Serializer):
     password1 = serializers.CharField(write_only=True)
     password2 = serializers.CharField(write_only=True)
 
-    def validate_email(self, value):
-        if CustomUser.objects.filter(email=value).exists():
-            raise serializers.ValidationError("This email is exists.")
-        return value
-
-    def validate_username(self, value):
-        if CustomUser.objects.filter(username=value).exists():
-            raise serializers.ValidationError("This username is exists.")
-        return value
+    def validate(self, attrs):
+        lookup = Q(email=attrs["email"]) | Q(username=attrs["username"])
+        if CustomUser.objects.filter(lookup).exists():
+            raise ValidationError(
+                {"message": "Your email or username is exists."})
+        if attrs["password1"] != attrs["password2"]:
+            raise ValidationError(
+                {"message": "Your entered passwords are not equal."})
+        return attrs
 
     def create(self, validated_data):
         validated_data.pop("password1")
@@ -51,15 +48,15 @@ class UpdateUserSerializer(serializers.Serializer):
     first_name = serializers.CharField(required=False)
     last_name = serializers.CharField(required=False)
 
-    def validate_email(self, value):
-        if CustomUser.objects.filter(email=value).exists():
-            raise serializers.ValidationError("This email is exists.")
-        return value
-
-    def validate_username(self, value):
-        if CustomUser.objects.filter(username=value).exists():
-            raise serializers.ValidationError("This username is exists.")
-        return value
+    def validate(self, attrs):
+        lookup = Q(email=attrs["email"]) | Q(username=attrs["username"])
+        if CustomUser.objects.filter(lookup).exists():
+            raise ValidationError(
+                {"message": "Your email or username is exists."})
+        if attrs["password1"] != attrs["password2"]:
+            raise ValidationError(
+                {"message": "Your entered passwords are not equal."})
+        return attrs
 
     def update(self, instance, validated_data):
         instance.email = validated_data.get("email", instance.email)
