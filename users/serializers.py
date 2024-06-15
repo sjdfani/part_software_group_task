@@ -43,3 +43,30 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         exclude = ("password",)
+
+
+class UpdateUserSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=False)
+    username = serializers.CharField(required=False)
+    first_name = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
+
+    def validate_email(self, value):
+        if CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("This email is exists.")
+        return value
+
+    def validate_username(self, value):
+        if CustomUser.objects.filter(username=value).exists():
+            raise serializers.ValidationError("This username is exists.")
+        return value
+
+    def update(self, instance, validated_data):
+        instance.email = validated_data.get("email", instance.email)
+        instance.username = validated_data.get("username", instance.username)
+        instance.first_name = validated_data.get(
+            "first_name", instance.first_name)
+        instance.last_name = validated_data.get(
+            "last_name", instance.last_name)
+        instance.save()
+        return instance
