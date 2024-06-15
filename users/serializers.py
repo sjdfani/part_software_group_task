@@ -21,7 +21,7 @@ class LoginSerializer(serializers.Serializer):
                 cache.delete(key_unique_id)
                 return attrs
             else:
-                raise ValidationError("You entered captcha is incorrect.")
+                raise ValidationError("Your entered captcha is incorrect.")
         else:
             raise ValidationError({"message": "Your captcha was expired."})
 
@@ -39,10 +39,21 @@ class RegisterSerializer(serializers.Serializer):
         # if CustomUser.objects.filter(lookup).exists():
         #     raise ValidationError(
         #         {"message": "Your email or username is exists."})
+
         if attrs["password1"] != attrs["password2"]:
             raise ValidationError(
                 {"passwords": "Your entered passwords are not equal."})
-        return attrs
+
+        key_unique_id = attrs["key_unique_id"]
+        obj = cache.get(key_unique_id)
+        if obj:
+            if obj == attrs["value_unique_id"]:
+                cache.delete(key_unique_id)
+                return attrs
+            else:
+                raise ValidationError("Your entered captcha is incorrect.")
+        else:
+            raise ValidationError({"message": "Your captcha was expired."})
 
     def create(self, validated_data):
         validated_data.pop("password1")
