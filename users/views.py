@@ -42,9 +42,21 @@ class Register(APIView):
         serializer = RegisterSerializer(
             data=request.data, context={"request": request}
         )
+        # First way
+        # serializer.is_valid(raise_exception=True)
+        # serializer.save()
+        # return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        # Second Way
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        is_created = serializer.get_or_create_in_one_shot(
+            serializer.validated_data)
+        if is_created:
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(
+            {"message": "This user with entered email and username is exists."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 class UsersList(ListAPIView):

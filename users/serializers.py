@@ -2,6 +2,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from .models import CustomUser
 from django.db.models import Q
+from django.contrib.auth.hashers import make_password
+from django.db import IntegrityError
 
 
 class LoginSerializer(serializers.Serializer):
@@ -18,13 +20,13 @@ class RegisterSerializer(serializers.Serializer):
     password2 = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        lookup = Q(email=attrs["email"]) | Q(username=attrs["username"])
-        if CustomUser.objects.filter(lookup).exists():
-            raise ValidationError(
-                {"message": "Your email or username is exists."})
+        # lookup = Q(email=attrs["email"]) | Q(username=attrs["username"])
+        # if CustomUser.objects.filter(lookup).exists():
+        #     raise ValidationError(
+        #         {"message": "Your email or username is exists."})
         if attrs["password1"] != attrs["password2"]:
             raise ValidationError(
-                {"message": "Your entered passwords are not equal."})
+                {"passwords": "Your entered passwords are not equal."})
         return attrs
 
     def create(self, validated_data):
@@ -34,6 +36,31 @@ class RegisterSerializer(serializers.Serializer):
         user.set_password(password)
         user.save()
         return user
+
+    def get_or_create_in_one_shot(self, validated_data):
+        try:
+            user, is_created = CustomUser.objects.get_or_create(
+                email=validated_data["email"],
+                username=validated_data["username"],
+                first_name=validated_data["first_name"],
+                last_name=validated_data["last_name"],
+                password=make_password(validated_data["password2"]),
+            )
+            return is_created
+        except IntegrityError as e:
+            print(e)
+            if 'unique constraint' in str(e).lower() and 'email' in str(e).lower():
+                raise ValidationError(
+                    {"message": "This email is already registered."})
+            elif 'unique constraint' in str(e).lower() and 'username' in str(e).lower():
+                raise ValidationError(
+                    {"message": "This username is already taken."})
+            else:
+                raise ValidationError(
+                    {"message": "A database integrity error occurred. Please try again."})
+        except Exception as e:
+            raise ValidationError(
+                {"message": "An unexpected error occurred. Please try again."})
 
 
 class UserSerializer(serializers.ModelSerializer):
