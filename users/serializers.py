@@ -4,11 +4,26 @@ from .models import CustomUser
 from django.db.models import Q
 from django.contrib.auth.hashers import make_password
 from django.db import IntegrityError
+from django.core.cache import cache
 
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
+    key_unique_id = serializers.CharField()
+    value_unique_id = serializers.CharField()
+
+    def validate(self, attrs):
+        key_unique_id = attrs["key_unique_id"]
+        obj = cache.get(key_unique_id)
+        if obj:
+            if obj == attrs["value_unique_id"]:
+                cache.delete(key_unique_id)
+                return attrs
+            else:
+                raise ValidationError("You entered captcha is incorrect.")
+        else:
+            raise ValidationError({"message": "Your captcha was expired."})
 
 
 class RegisterSerializer(serializers.Serializer):
