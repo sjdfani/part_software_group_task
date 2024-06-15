@@ -192,3 +192,20 @@ LOGGING = {
         },
     },
 }
+
+
+# Redis configuration
+REDIS_HOST = env('REDIS_HOST')
+REDIS_PORT = env('REDIS_PORT', cast=int)
+REDIS_DB = env('REDIS_DB_INDEX', cast=int)
+REDIS_PASSWORD = env("REDIS_PASSWORD")
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
