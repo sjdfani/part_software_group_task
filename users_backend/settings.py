@@ -152,6 +152,9 @@ MEDIA_ROOT = BASE_DIR / 'media_root'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'users.authentication.CustomJWTAuthentication',
+    ],
     'DATETIME_FORMAT': '%s',
 }
 
