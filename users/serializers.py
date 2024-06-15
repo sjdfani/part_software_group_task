@@ -21,7 +21,8 @@ class LoginSerializer(serializers.Serializer):
                 cache.delete(key_unique_id)
                 return attrs
             else:
-                raise ValidationError("Your entered captcha is incorrect.")
+                raise ValidationError(
+                    {"message": "Your entered captcha is incorrect."})
         else:
             raise ValidationError({"message": "Your captcha was expired."})
 
@@ -53,7 +54,8 @@ class RegisterSerializer(serializers.Serializer):
                 cache.delete(key_unique_id)
                 return attrs
             else:
-                raise ValidationError("Your entered captcha is incorrect.")
+                raise ValidationError(
+                    {"message": "Your entered captcha is incorrect."})
         else:
             raise ValidationError({"message": "Your captcha was expired."})
 
