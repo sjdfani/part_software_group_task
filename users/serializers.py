@@ -33,6 +33,8 @@ class RegisterSerializer(serializers.Serializer):
     last_name = serializers.CharField()
     password1 = serializers.CharField(write_only=True)
     password2 = serializers.CharField(write_only=True)
+    key_unique_id = serializers.CharField()
+    value_unique_id = serializers.CharField()
 
     def validate(self, attrs):
         # lookup = Q(email=attrs["email"]) | Q(username=attrs["username"])
