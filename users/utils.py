@@ -4,6 +4,9 @@ import json
 from hashlib import sha256
 from datetime import datetime
 from django.conf import settings
+import random
+import string
+from django.core.cache import cache
 
 
 def base64url_encode(data):
@@ -60,3 +63,21 @@ def verify_jwt_token(token):
         return payload
     except Exception as e:
         return False
+
+
+def number_generator(size=10):
+    chars = string.digits
+    return ''.join(random.choice(chars) for _ in range(size))
+
+
+def check_captcha_code(attrs):
+    key_unique_id = attrs["key_unique_id"]
+    obj = cache.get(key_unique_id)
+    if obj:
+        if obj == attrs["value_unique_id"]:
+            cache.delete(key_unique_id)
+            return True
+        else:
+            return False, {"message": "Your entered captcha is incorrect."}
+    else:
+        raise False, {"message": "Your captcha was expired."}
