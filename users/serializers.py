@@ -36,3 +36,9 @@ class RegisterSerializer(serializers.Serializer):
         user = CustomUser.objects.create(**validated_data)
         user.set_password(password)
         return user
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        exclude = ("password",)
