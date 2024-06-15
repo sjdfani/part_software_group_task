@@ -12,8 +12,6 @@ from .models import CustomUser
 import uuid
 from django.core.cache import cache
 from users_backend.settings import env
-from rest_framework import viewsets
-import random
 
 
 class Login(APIView):
