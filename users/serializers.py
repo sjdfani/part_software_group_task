@@ -7,7 +7,7 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate_email(self, value):
-        if not CustomUser.objects.filter(email=value):
+        if not CustomUser.objects.filter(email=value).exists():
             raise serializers.ValidationError("This email is not exists.")
         return value
 
