@@ -161,7 +161,7 @@ REST_FRAMEWORK = {
 
 
 JWT_SETTINGS = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=env("ACCESS_TOKEN_LIFETIME", cast=int)),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=env("ACCESS_TOKEN_LIFETIME", cast=int)),
     'ALGORITHM': env("JWT_ALGORITHM"),
     'SIGNING_KEY': SECRET_KEY,
 }
@@ -175,4 +175,20 @@ SWAGGER_SETTINGS = {
         }
     },
     'USE_SESSION_AUTH': False,
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        },
+    },
 }
