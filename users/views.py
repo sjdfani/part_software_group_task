@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import ListAPIView, DestroyAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from .utils import create_jwt_token
+from .utils import create_jwt_token, number_generator
 from .serializers import (
     LoginSerializer, RegisterSerializer, UserSerializer, UpdateUserSerializer,
 )
@@ -12,6 +12,8 @@ from .models import CustomUser
 import uuid
 from django.core.cache import cache
 from users_backend.settings import env
+from rest_framework import viewsets
+import random
 
 
 class Login(APIView):
@@ -94,7 +96,7 @@ class UpdateUser(APIView):
 class GenerateCaptcha(APIView):
     def get(self, request):
         key_unique_id = uuid.uuid4().hex
-        value_unique_id = uuid.uuid4().hex
+        value_unique_id = number_generator(6)
         cache.set(
             key_unique_id, value_unique_id,
             timeout=env("EXPIRE_CAPTCHA_CODE", cast=int)
