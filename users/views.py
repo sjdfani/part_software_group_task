@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate
 from rest_framework.permissions import AllowAny
 from .utils import create_jwt_token
 from .serializers import (
-    LoginSerializer,
+    LoginSerializer, RegisterSerializer,
 )
 
 
@@ -31,3 +31,15 @@ class Login(APIView):
                 {"message": "Your email or password is incorrect."},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
+
+
+class Register(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        serializer = RegisterSerializer(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
