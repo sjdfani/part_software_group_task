@@ -47,6 +47,7 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     'rest_framework',
     'corsheaders',
+    'drf_yasg',
 ]
 
 LOCAL_APPS = [
@@ -163,4 +164,15 @@ JWT_SETTINGS = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=env("ACCESS_TOKEN_LIFETIME", cast=int)),
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
+}
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+    'USE_SESSION_AUTH': False,
 }
