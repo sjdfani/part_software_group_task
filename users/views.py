@@ -9,6 +9,9 @@ from .serializers import (
 )
 from .permissions import Is_Superuser
 from .models import CustomUser
+import uuid
+from django.core.cache import cache
+from users_backend.settings import env
 
 
 class Login(APIView):
@@ -86,3 +89,17 @@ class UpdateUser(APIView):
 
     def patch(self, request,  *args, **kwargs):
         return self.update_information(request=request)
+
+
+class GenerateCaptcha(APIView):
+    def get(self, request):
+        key_unique_id = uuid.uuid4().hex
+        value_unique_id = uuid.uuid4().hex
+        cache.set(
+            key_unique_id, value_unique_id,
+            timeout=env("EXPIRE_CAPTCHA_CODE", cast=int)
+        )
+        return Response(
+            {"key": key_unique_id, "value": value_unique_id},
+            status=status.HTTP_200_OK,
+        )
