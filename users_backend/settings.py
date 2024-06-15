@@ -162,7 +162,7 @@ REST_FRAMEWORK = {
 
 JWT_SETTINGS = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=env("ACCESS_TOKEN_LIFETIME", cast=int)),
-    'ALGORITHM': 'HS256',
+    'ALGORITHM': env("JWT_ALGORITHM"),
     'SIGNING_KEY': SECRET_KEY,
 }
 
