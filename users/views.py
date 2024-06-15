@@ -2,7 +2,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import ListAPIView, DestroyAPIView
-from django.contrib.auth import authenticate
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .utils import create_jwt_token
 from .serializers import (
@@ -22,18 +21,18 @@ class Login(APIView):
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data["email"]
         password = serializer.validated_data["password"]
-        user = authenticate(email=email, password=password)
-        if user is not None:
-            token = create_jwt_token(user.id)
-            return Response(
-                {"access_token": token},
-                status=status.HTTP_200_OK,
-            )
-        else:
-            return Response(
-                {"message": "Your email or password is incorrect."},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
+        user = CustomUser.objects.filter(email=email)
+        if user.exists():
+            if user.first().check_password(password):
+                token = create_jwt_token(user.first().id)
+                return Response(
+                    {"access_token": token},
+                    status=status.HTTP_200_OK,
+                )
+        return Response(
+            {"message": "Your email or password is incorrect."},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
 
 
 class Register(APIView):
