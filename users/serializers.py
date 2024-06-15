@@ -4,7 +4,7 @@ from .models import CustomUser
 from django.db.models import Q
 from django.contrib.auth.hashers import make_password
 from django.db import IntegrityError
-from django.core.cache import cache
+from .utils import check_captcha_code
 
 
 class LoginSerializer(serializers.Serializer):
@@ -14,17 +14,10 @@ class LoginSerializer(serializers.Serializer):
     value_unique_id = serializers.CharField()
 
     def validate(self, attrs):
-        key_unique_id = attrs["key_unique_id"]
-        obj = cache.get(key_unique_id)
-        if obj:
-            if obj == attrs["value_unique_id"]:
-                cache.delete(key_unique_id)
-                return attrs
-            else:
-                raise ValidationError(
-                    {"message": "Your entered captcha is incorrect."})
-        else:
-            raise ValidationError({"message": "Your captcha was expired."})
+        result = check_captcha_code(attrs)
+        if not isinstance(result, tuple):
+            return attrs
+        raise ValidationError(result[1])
 
 
 class RegisterSerializer(serializers.Serializer):
@@ -46,18 +39,10 @@ class RegisterSerializer(serializers.Serializer):
         if attrs["password1"] != attrs["password2"]:
             raise ValidationError(
                 {"passwords": "Your entered passwords are not equal."})
-
-        key_unique_id = attrs["key_unique_id"]
-        obj = cache.get(key_unique_id)
-        if obj:
-            if obj == attrs["value_unique_id"]:
-                cache.delete(key_unique_id)
-                return attrs
-            else:
-                raise ValidationError(
-                    {"message": "Your entered captcha is incorrect."})
-        else:
-            raise ValidationError({"message": "Your captcha was expired."})
+        result = check_captcha_code(attrs)
+        if not isinstance(result, tuple):
+            return attrs
+        raise ValidationError(result[1])
 
     def create(self, validated_data):
         validated_data.pop("password1")
